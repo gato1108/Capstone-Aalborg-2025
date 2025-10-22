@@ -9,6 +9,12 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
 
     model = Model('aalbor_u')
 
+    ## Duplicación ##
+    n_talleres = len(T)
+    T = [i for i in range(2 * n_talleres)]
+    U = U + U
+    D = D + D
+
     ###############
     ## VARIABLES ##
     ###############
@@ -103,6 +109,11 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
                 quicksum(y[t, h] for h in H) == 2,
                 name=f"taller_dia-completo[{h},{t}]"
             )
+    
+    # NO el mismo taller
+    for s in S:
+        for i in range(n_talleres):
+            model.addConstr(w[s, i] + w[s, i + n_talleres] <= 1)
 
 
     ############################################################
@@ -111,7 +122,7 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
 
     model.setObjective(
         quicksum(
-            p[i] * quicksum(w[s, t_pref[s][i + 1]] for s in S)
+            p[i] * quicksum(w[s, t_pref[s][i + 1]] + w[s, t_pref[s][i + 1] + n_talleres] for s in S)
             for i in range(3)
         ),
         GRB.MAXIMIZE
