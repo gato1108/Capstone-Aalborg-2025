@@ -69,6 +69,7 @@ def ver_asignaciones(w):
                 lista = []
                 lista.append(key[1])
             print(f"El estudiante {key[0]} fue asignado al taller {key[1]}")
+    dic_asignaciones_realizadas[e] = lista #agrega al último estudiante
     del dic_asignaciones_realizadas[-1] 
 
     return dic_asignaciones_realizadas
