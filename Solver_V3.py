@@ -6,10 +6,11 @@ from collections import defaultdict
 
 
 def solver(S, T, H, C, U, t_pref, D, p, outputflag):
-
     model = Model('aalbor_u')
 
-    ## Duplicación ##
+    # =========================
+    #   DUPLICACIÓN DE DATOS
+    # =========================
     n_talleres = len(T)
     T1 = list(range(n_talleres))
     T2 = [t + n_talleres for t in T1]
@@ -17,20 +18,18 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
     U = U + U
     D = D + D
 
-    ###############
-    ## VARIABLES ##
-    ###############
-
+    # =========================
+    #        VARIABLES
+    # =========================
     z = model.addVars(T, vtype=GRB.BINARY, name="z")      # 1 si el taller i se dicta, 0 si no
     y = model.addVars(T, H, vtype=GRB.BINARY, name="y")   # 1 si el taller i se dicta en el horario h, 0 si no
     w = model.addVars(S, T, vtype=GRB.BINARY, name="w")   # 1 si el estudiante s se asigna al taller i
 
+    # =========================================================
+    #                    RESTRICCIONES
+    # =========================================================
 
-    #########################################################
-    ##################### RESTRICCIONES #####################
-    #########################################################
-
-    #------------- Facility Location -------------#
+    # ---------- Facility Location ----------
     for t in T:
         if D[t] == 1:  # taller de día completo
             model.addConstr(
@@ -49,8 +48,7 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
             name=f"capacidad_horario[{h}]"
         )
 
-    #------------- Asignación Estudiantes -------------#
-
+    # ---------- Asignación de Estudiantes ----------
     # cada estudiante en al menos 1 taller
     for s in S:
         model.addConstr(
@@ -73,18 +71,7 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
                 name=f"conflicto_horario[{s},{h}]"
             )
 
-    # max dos horarios para el mismo taller
-    #for t in T:
-    #    for h in H:
-    #        for h2 in H:
-    #            if h != h2:
-    #                model.addConstr(
-    #                    y[t, h] + D[t] * y[t, h2] <= 2,
-    #                    name=f"diario[{t},{h},{h2}]"
-    #                )
-
-    #------------- Extra -------------#
-
+    # ---------- Extra ----------
     # completar la carga diaria
     for s in S:
         # suma de unidades asignadas: medio día=1, día completo=2
@@ -104,40 +91,35 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
                 name=f"solo_si_se_dicta[{s},{t}]"
             )
 
-    # si el taller es de día completo, lo asigno a ambos módulos
-    #for t in T:
-    #    if D[t] == 1:  # taller de día completo
-    #        model.addConstr(
-    #            quicksum(y[t, h] for h in H) == 2,
-    #            name=f"taller_dia-completo[{h},{t}]"
-    #        )
-    
-    # NO el mismo taller
+    # NO el mismo taller (evita duplicar en AM/PM)
     for s in S:
         for i in range(n_talleres):
-            model.addConstr(w[s, i] + w[s, i + n_talleres] <= 1)
+            model.addConstr(
+                w[s, i] + w[s, i + n_talleres] <= 1
+            )
 
-
-    ############################################################
-    ##################### FUNCIÓN OBJETIVO #####################
-    ############################################################
-
+    # =========================================================
+    #                  FUNCIÓN OBJETIVO
+    # =========================================================
     model.setObjective(
         quicksum(
-            p[i] * quicksum(w[s, t_pref[s][i + 1]] + w[s, t_pref[s][i + 1] + n_talleres] for s in S)
+            p[i] * quicksum(
+                w[s, t_pref[s][i + 1]] +
+                w[s, t_pref[s][i + 1] + n_talleres]
+                for s in S
+            )
             for i in range(3)
         ),
         GRB.MAXIMIZE
     )
 
-
-    ######################################################
-    ####################### SOLVER #######################
-    ######################################################
-
-    model.Params.TimeLimit = 1800  # 30 min
+    # =========================================================
+    #                      SOLVER
+    # =========================================================
+    model.Params.TimeLimit = 1800       # 30 min
     model.Params.OutputFlag = outputflag
     model.Params.Seed = 69420
     model.optimize()
 
     return model, y, z, w
+
