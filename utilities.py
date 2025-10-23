@@ -31,6 +31,13 @@ def ver_talleres(z):
         else:
             print(f"El taller {i} no se realizará")
 
+def ver_talleres_mod(z, m):
+    for i in range(len(z)):
+        if (z[i].X) == 1.0:
+            print(f"El taller {i%m}.{i//m} fue elegido para realizarse")
+        else:
+            print(f"El taller {i%m}.{i//m} no se realizará")
+
 def talleres_horarios(y):
     talleres_AM = []
     talleres_PM = []
