@@ -18,20 +18,20 @@ def get_dict(data, row):
     ans[1] = 0
     ans[2] = 0
     ans[3] = 0
-    names = generate_col_nums(data)           #asocia a cada taller un id 0, 1, ...
+    names = generate_col_nums(data)           #associate each workshop with an ID 0, 1, …
     for col in data.columns:
-        if not np.isnan(data.iloc[row][col]): #si no es Nan, es decir, si está en su top 3
+        if not np.isnan(data.iloc[row][col]): #if it is not NaN, i.e., if it is in their top 3 choices
             ans[int(data.iloc[row][col])] = names[col]
     return ans
 
-def ver_talleres(z):
+def view_workshops(z):
     for i in range(len(z)):
         if (z[i].X) == 1.0:
             print(f"El taller {i} fue elegido para realizarse")
         else:
             print(f"El taller {i} no se realizará")
 
-def ver_talleres_mod(z, m):
+def view_workshops_mod(z, m):
     for i in range(len(z)):
         if (z[i].X) == 1.0:
             print(f"El taller {i%m}.{i//m} fue elegido para realizarse")
