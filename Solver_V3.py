@@ -34,7 +34,7 @@ def solver(S, T, H, C, U, t_pref, D, p, outputflag):
         if D[t] == 1:  # full-day workshop
             model.addConstr(
                 quicksum(y[t, h] for h in H) == 2 * z[t],
-                name=f"full_day_taller[{t}]"
+                name=f"full_day_workshop[{t}]"
             )
         else:
             model.addConstr(
