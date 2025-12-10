@@ -14,7 +14,6 @@ def generate_col_nums(data):
 
 def get_dict(data, row):
     ans = {}
-    # PROVISOR #
     ans[1] = 0
     ans[2] = 0
     ans[3] = 0
@@ -27,78 +26,77 @@ def get_dict(data, row):
 def view_workshops(z):
     for i in range(len(z)):
         if (z[i].X) == 1.0:
-            print(f"El taller {i} fue elegido para realizarse")
+            print(f"Workshop {i} was selected to be held")
         else:
-            print(f"El taller {i} no se realizará")
+            print(f"Workshop {i} will not be held")
 
 def view_workshops_mod(z, m):
     for i in range(len(z)):
         if (z[i].X) == 1.0:
-            print(f"El taller {i%m}.{i//m} fue elegido para realizarse")
+            print(f"Workshop {i % m}.{i // m} was selected to be held")
         else:
-            print(f"El taller {i%m}.{i//m} no se realizará")
+            print(f"Workshop {i%m}.{i//m} will not be held")
 
-def talleres_horarios(y):
-    talleres_AM = []
-    talleres_PM = []
+def workshop_schedules(y):
+    workshops_AM = []
+    workshops_PM = []
     for key, var in y.items():
-        #print(key, var.X)
         if (var.X) == 1.0:
             if (key[1]) == 1:
-                print(f"El taller {key[0]} se da en el horario PM")
-                talleres_PM.append(key[0])
+                print(f"Workshop {key[0]} is held in the PM time slot")
+                workshops_PM.append(key[0])
             else:
-                print(f"El taller {key[0]} se da en el horario AM")  
-                talleres_AM.append(key[0])
+                print(f"Workshop {key[0]} is held in the AM time slot") 
+                workshops_AM.append(key[0])
 
-    return talleres_AM, talleres_PM
+    return workshops_AM, workshops_PM
 
-def ver_asignaciones(w):
-    dic_asignaciones_realizadas = {}
+def view_assignments(w):
+    assignments_made_dict = {}
     e = -1
-    lista = []
+    list = []
     for key, var in w.items():
         if var.X == 1.0:
             #print(key, var.X)
-            estudiante = key[0]
-            if (estudiante == e):
-                lista.append(key[1])
+            student = key[0]
+            if (student == e):
+                list.append(key[1])
             else:            
-                dic_asignaciones_realizadas[e] = lista
-                e = estudiante
-                lista = []
-                lista.append(key[1])
-            print(f"El estudiante {key[0]} fue asignado al taller {key[1]}")
-    dic_asignaciones_realizadas[e] = lista #agrega al último estudiante
-    del dic_asignaciones_realizadas[-1] 
+                assignments_made_dict[e] = list
+                e = student
+                list = []
+                list.append(key[1])
+            print(f"Student {key[0]} was assigned to workshop {key[1]}")
+    assignments_made_dict[e] = list # add the last student
+    del assignments_made_dict[-1] 
 
-    return dic_asignaciones_realizadas
+    return assignments_made_dict
 
-def get_par(pref):
+def get_pair(pref):
 
-    # --- Dimensiones ---
+    # --- Dimensions ---
     n_students  = len(pref)        # number of students in master AAL
     n_workshops = pref.shape[1]    # number of workshops in master AAL
 
-    S = [n for n in range(n_students)]   # numera a los estudiantes
-    T = [n for n in range(n_workshops)]  # numera a los talleres
+    S = [n for n in range(n_students)]   # number the students
+    T = [n for n in range(n_workshops)]  # number the workshops
 
-    # --- Horarios ---
-    H = [0, 1]                           # AM (0) o PM (1)
-                                        # Revisar siempre que sea válido, es decir, que el total de vacantes
-                                        # para la mañana y la tarde sea >= que la cantidad de estudiantes.
+    # --- Schedules ---
+    H = [0, 1]                           # AM (0) or PM (1)
+                                        # Always check that it is valid, i.e., that the total number of seats
+                                        # in the morning and afternoon is >= the number of students.
 
-    # --- Capacidades ---
-    C = [3, 3]                           # capacidad de talleres por horario (AM, PM)
-    U = [20 for _ in range(n_workshops)]# capacidad de cada taller (todos con 150 cupos)
+    # --- Capacities ---
+    C = [3, 3]                           # capacity of workshops by time slot (AM, PM)
+    U = [20 for _ in range(n_workshops)] # capacity of each workshop
 
-    # --- Preferencias ---
+    # --- Preferences ---
     t_pref = [get_dict(pref, n) for n in range(n_students)]
 
-    # --- Duración de talleres ---
-    D = [0 for _ in range(n_workshops)]  # 1 si el taller es de día completo, 0 si no
+    # --- Workshop duration ---
+    D = [0 for _ in range(n_workshops)]  # 1 if the workshop is full-day, 0 if not
 
-    # --- Pesos ---
-    p = [10, 5, 3]                       # pesos para cada preferencia
+    # --- Weights ---
+    p = [10, 5, 3]                       # weights for each preference
 
     return (S, T, H, C, U, t_pref, D, p)
